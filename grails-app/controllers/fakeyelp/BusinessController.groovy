@@ -12,8 +12,8 @@ class BusinessController {
 
   def getBusinesses(String city, String state, Float stars, Integer review_count, Boolean use_index) {
 
-    def bizMap = [:]
-    
+    println("Parameters: " + params)
+
     def x = Class.forName("com.mapr.ojai.store.impl.OjaiDriver", true, Thread.currentThread().contextClassLoader)
     def _maprDBConn = DriverManager.getConnection("ojai:mapr:")
 
@@ -31,53 +31,42 @@ class BusinessController {
 
     def query = _maprDBConn.newQuery()
 
-    query.select("city,state,stars,review_count,name,categories")
+    def selectFields = "name,city,state,stars,review_count,categories".split(',')
+    for (String field : selectFields) {
+      query.select(field)
+    }
+
     query.orderBy("stars", SortOrder.DESC).orderBy("review_count", SortOrder.DESC)
     query.where(condition)
     query.limit(20)
     query.build()
 
-
-
     def stream = null
     try {
-      docStore.findQuery(query)
+      stream = docStore.findQuery(query)
       println("Parameters: " + params)
     } catch (Exception e) {
       println("Exception thrown: " + e.getMessage())
       log.error "problem was encountered while running query against table " + tableName, e
       //handleException(e, "problem was encountered while running query against table " + tableName)
     }
-    println("The docStore returned a " + stream.getClass().toString())
+
+    def results = []
     for ( Document record : stream) {
+      def businessData = [:]
       for(Map.Entry<String, Value> kv : record) {
-        bizMap.put(kv.getKey(), Values.asJsonString(kv.getValue()))
+        businessData.put("name", record.getString("name"))
+        businessData.put("city", record.getString("city"))
+        businessData.put("state", record.getString("state"))
+        businessData.put("review_count", record.getLong("review_count"))
+        businessData.put("stars", record.getFloat("stars"))
       }
+      results.add(businessData)
     }
 
-    println("Parameters: " + params)
 
-    bizMap['name'] = 'Starbucks'
-    bizMap['city'] = 'Mountain View'
-    bizMap['state'] = 'CA'
-    bizMap['stars'] = 2.0
-    bizMap['review_count'] = 4500
+    println(results)
 
-
-    def answer = [:]
-    if (use_index) {
-      answer['name'] = 'McDonalds'
-    } else {
-      answer['name'] = 'Caffolas'
-    }
-
-    answer['city'] = city
-    answer['state'] = state
-    answer['stars'] = stars
-    answer['review_count'] = review_count
-
-    def arr = [bizMap, answer]
-
-    render (template: "/business/businessList", model: [businesses: arr] )
+    render (template: "/business/businessList", model: [businesses: results] )
   }
 }

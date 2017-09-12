@@ -15,12 +15,14 @@
       $('#button').click(function(event){
 
         var URL = "${createLink(controller: 'business', action: 'getBusinesses')}";
-
+        var start = performance.now();
         $.ajax({
           url: URL,
           data: $( '#lookupForm' ).serialize(),
           success: function(resp) {
             $('#divBody').html(resp);
+            var queryTime = performance.now() - startTimer;
+            $('#query_time').html("<h2>" + queryTime + "</h2>")
           },
           onError: function(resp) {
             alert("Error: " + resp.toJSON());
@@ -63,6 +65,9 @@
       <input type="checkbox" name="use_index" id="use_index"/>
       <button type="button"  id="button" name="button" >Get Businesses</button>
     </form>
+
+
+    <div id="query_time"></div>
 
     <div id="divBody" ></div>
 
