@@ -13,7 +13,9 @@
 
     $(document).ready(function() {
       $('#button').click(function(event){
-
+        var h3 = document.createElement("h1");
+        h3.appendChild(document.createTextNode("Working ..."));
+        $('#divBody').html(h3);
         var URL = "${createLink(controller: 'business', action: 'getBusinesses')}";
         var start = performance.now();
         $.ajax({
@@ -22,7 +24,6 @@
           success: function(resp) {
             $('#divBody').html(resp);
             var queryTime = performance.now() - startTimer;
-            $('#query_time').html("<h2>" + queryTime + "</h2>")
           },
           onError: function(resp) {
             alert("Error: " + resp.toJSON());
@@ -40,6 +41,8 @@
     <h2>Look up reviewed businesses</h2>
 
     <form id="lookupForm" >
+      <label>Business Name</label>
+      <input name="bizname" id="bizname"/><br/>
       <label>City</label>
       <select name="city" id="city">
         <g:each in="${cities}" var="city">
@@ -53,17 +56,11 @@
           <option value="${state}">${state}</option>
         </g:each>
       </select><br/>
-      <label>Stars</label>
-      <select name="stars" id="stars">
-        <g:each in="${stars}" var="${star}">
-          <option value="${star}">${star}</option>
-        </g:each>
-      </select><br/>
-      <label>Min Review Count</label>
-      <input type="text" name="review_count" id="review_count"/>
-      <label>Use Index</label>
-      <input type="checkbox" name="use_index" id="use_index"/>
-      <button type="button"  id="button" name="button" >Get Businesses</button>
+
+      <input type="radio" name="dbtype" id="use_index" value="not_indexed"/>Use HBase<br/>
+      <input type="radio" name="dbtype" id="use_index" value="indexed"/>Use MapR DB<br/>
+
+      <button type="button"  id="button" name="button" >Get Rating</button>
     </form>
 
 

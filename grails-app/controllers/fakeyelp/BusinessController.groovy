@@ -10,33 +10,39 @@ import org.ojai.store.SortOrder
 
 class BusinessController {
 
-  def getBusinesses(String city, String state, Float stars, Integer review_count, Boolean use_index) {
+  def getBusinesses(String bizname, String city, String state, Float stars, Integer review_count, String dbtype) {
 
     println("Parameters: " + params)
 
     def x = Class.forName("com.mapr.ojai.store.impl.OjaiDriver", true, Thread.currentThread().contextClassLoader)
     def _maprDBConn = DriverManager.getConnection("ojai:mapr:")
 
-    def tableName = "/tables/business"
+
+    def tableName = null
+    if (dbtype.equals("indexed")) {
+      tableName = "/tables/business"
+    }
+    else {
+      tableName = "/tables2/business"
+    }
     def docStore = _maprDBConn.getStore(tableName)
 
     def condition = MapRDB.newCondition()
             .and()
+            .is("name", Op.EQUAL, bizname)
             .is("city", Op.EQUAL, city)
             .is("state", Op.EQUAL, state)
-            .is("stars", Op.GREATER_OR_EQUAL, stars)
-            .is("review_count", Op.GREATER_OR_EQUAL, review_count)
             .close()
             .build()
 
     def query = _maprDBConn.newQuery()
 
-    def selectFields = "name,city,state,stars,review_count,categories".split(',')
+    def selectFields = "name,city,state,stars,review_count".split(',')
     for (String field : selectFields) {
       query.select(field)
     }
 
-    query.orderBy("stars", SortOrder.DESC).orderBy("review_count", SortOrder.DESC)
+    query.orderBy("stars", SortOrder.DESC)
     query.where(condition)
     query.limit(20)
     query.build()
@@ -63,8 +69,15 @@ class BusinessController {
       }
       results.add(businessData)
     }
-
-
+/*
+    def results = []
+    def biz1 = ["name": "McDonsalds", "city": "Sunnyvale", "state": "CA", "review_count": 3456, "stars": "4.7",
+                "categories": ["restaraunt", "fast food", "cheeseburger"]]
+    results.add(biz1)
+    def biz2 = ["name": "Starbucks", "city": "Sunnyvale", "state": "CA", "review_count": 4125, "stars": "4.9",
+              "categories": ["Coffee", "Tea"]]
+    results.add(biz2)
+    */
     println(results)
 
     render (template: "/business/businessList", model: [businesses: results] )
