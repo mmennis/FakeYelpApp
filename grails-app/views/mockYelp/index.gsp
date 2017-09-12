@@ -39,13 +39,28 @@
 
     <form id="lookupForm" >
       <label>City</label>
-      <input type="text" name="city" id="city" /><br/>
+      <select name="city" id="city">
+        <g:each in="${cities}" var="city">
+          <option value="${city}">${city}</option>
+        </g:each>
+
+      </select><br/>
       <label>State</label>
-      <input type="text" name="state" id="state" /><br/>
+      <select name="state" id="state" >
+        <g:each in="${states}" var="${state}">
+          <option value="${state}">${state}</option>
+        </g:each>
+      </select><br/>
       <label>Stars</label>
-      <input type="text" name="stars" id="stars" /><br/>
+      <select name="stars" id="stars">
+        <g:each in="${stars}" var="${star}">
+          <option value="${star}">${star}</option>
+        </g:each>
+      </select><br/>
       <label>Min Review Count</label>
       <input type="text" name="review_count" id="review_count"/>
+      <label>Use Index</label>
+      <input type="checkbox" name="use_index" id="use_index"/>
       <button type="button"  id="button" name="button" >Get Businesses</button>
     </form>
 

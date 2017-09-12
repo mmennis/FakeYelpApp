@@ -58,11 +58,16 @@ dependencies {
     runtime "org.json:json:20140107"
     runtime "com.jcraft:jsch:0.1.52"
     runtime "com.fasterxml.jackson.core:jackson-databind:"
-    provided "com.mapr.ojai:mapr-ojai-driver:6.0.0-mapr-SNAPSHOT"
-    provided "com.mapr.hadoop:maprfs:6.0.0-mapr-SNAPSHOT"
+    compile ("com.mapr.ojai:mapr-ojai-driver:6.0.0-mapr-SNAPSHOT"){
+      exclude group: "org.apache.drill", module: "drill-client:"
+    }
+    compile "com.mapr.hadoop:maprfs:6.0.0-mapr-SNAPSHOT"
     compile ("com.mapr.db:maprdb:6.0.0-mapr-SNAPSHOT"){
       exclude group: "com.mapr.hadoop", module: "maprfs"
+      exclude group: "org.apache.hadoop", module: "hadoop*"
     }
+    compile "org.apache.hbase:hbase-client:1.1.8-mapr-1702-SNAPSHOT"
+    compile "org.apache.hadoop:hadoop-client:"
     testCompile "org.grails:grails-gorm-testing-support"
     testCompile "org.grails.plugins:geb"
     testCompile "org.grails:grails-web-testing-support"
